@@ -11,7 +11,7 @@ Set a gif as your wallpaper.
 3. make
 4. make install
 
-#Usage
+##Usage
 
 To set an gif in the center of the screen "giphytool -c some/path/animation.gif".<br>
 For full usage "giphytool --help for usage".
