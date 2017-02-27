@@ -1,0 +1,23 @@
+AC_INIT([giphytool],[0.1.0])
+AC_CONFIG_SRCDIR([src/giphytool.c])
+
+AM_INIT_AUTOMAKE([-Wall foreign])
+AM_SILENT_RULES([yes])
+
+AC_PROG_CC
+PKG_PROG_PKG_CONFIG
+
+PKG_CHECK_MODULES(gtk, [gtk+-3.0 >= 3.2.0])
+
+GIPHYTOOL_CFLAGS="$gtk_CFLAGS"
+GIPHYTOOL_LIBS="$gtk_LIBS"
+
+AC_SUBST(GIPHYTOOL_CFLAGS)
+AC_SUBST(GIPHYTOOL_LIBS)
+
+AC_OUTPUT([
+    Makefile
+    src/Makefile
+])
+
+

@@ -1,4 +1,4 @@
-//gcc giphytool.c -o giphytool `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
+/* giphytool (c) 2017 Ceysun Sucu */
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -10,7 +10,8 @@
 #include <unistd.h>
 
 
-static void destroy(void) {
+static void destroy(void) 
+{
   gtk_main_quit();
 }
 
