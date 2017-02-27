@@ -14,6 +14,6 @@ Set a gif as your wallpaper.
 ##Usage
 
 To set an gif in the center of the screen "giphytool -c some/path/animation.gif".<br>
-For full usage "giphytool --help for usage".
+For full usage "giphytool --help".
 
 
