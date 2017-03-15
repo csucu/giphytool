@@ -1,19 +1,14 @@
-# Giphytool
+Giphytool
 Set a gif as your wallpaper. 
 
-## Requires
+Requires
 * GTK 3.0
 
-## Installation
+Installation
+./Autogen.sh && ./configure && make && make install
 
-1. ./Autogen.sh
-2. ./configure
-3. make
-4. make install
-
-## Usage
-
-To set an gif in the center of the screen "giphytool -c some/path/animation.gif".<br>
-For full usage "giphytool --help".
+Usage
+To set an gif in the center of the screen: giphytool -c some/path/animation.gif"
+For full usage: giphytool --help
 
 
