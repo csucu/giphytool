@@ -5,6 +5,7 @@ Set a gif as your wallpaper.
 * GTK 3.0
 
 ## Installation
+Download [here](/releases)
 
 1. ./Autogen.sh
 2. ./configure
