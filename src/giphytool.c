@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
+#include <glib/gprintf.h>
 
 
 static void destroy(void) 
@@ -29,6 +30,11 @@ static void usage(void)
 
 int main (int argc, char **argv)
 {
+  if(argc < 3) {
+      printf("incorrect usage\n");
+      usage();
+      return 1;
+  }
 
   int i;
   pid_t pid, sid;
@@ -38,11 +44,18 @@ int main (int argc, char **argv)
   GtkWidget *layout;
   GtkWidget *image;
   GdkPixbuf *pb;
+  GError *err = NULL;
 
   int center_window = 0;
 
   gtk_init(NULL,NULL);
-  pb = gdk_pixbuf_new_from_file (argv[argc-1],NULL);
+  pb = gdk_pixbuf_new_from_file (argv[argc-1],&err);
+  if (pb == NULL) {
+      g_fprintf(stderr, "%s\n", err->message);
+      g_error_free(err);
+      return 1;
+  }
+
   gint image_width = gdk_pixbuf_get_width(pb);
   gint image_height = gdk_pixbuf_get_height(pb);
 
@@ -56,7 +69,7 @@ int main (int argc, char **argv)
     else if(strcmp(argv[i], "-tl") == 0)
     {
       x_pos = 0;
-      y_pos = 0;;
+      y_pos = 0;
     }
     else if(strcmp(argv[i], "-tr") == 0)
     {
