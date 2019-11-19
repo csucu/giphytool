@@ -11,15 +11,15 @@
 #include <glib/gprintf.h>
 
 
-static void destroy(void) 
+static void destroy(void)
 {
-  gtk_main_quit();
+    gtk_main_quit();
 }
 
 static void usage(void)
 {
-  fprintf (stderr, "\nUsage:\n giphytool [options] [gif-path]\n\n");
-  fprintf (stderr, "Options:\n \
+    fprintf (stderr, "\nUsage:\n giphytool [options] [gif-path]\n\n");
+    fprintf (stderr, "Options:\n \
       -p      -Set position by x and y cordinates. -p x y (i.e -p 100 100)\n \
       -c      -Center\n \
       -tl     -Posiftion top-left\n \
@@ -28,119 +28,145 @@ static void usage(void)
       -br     -Posiftion bottom-right\n");
 }
 
+char * get_absolute_path(char *fname) {
+    char *absfname = NULL;
+
+    if (fname[0] == '/') {
+        absfname = fname;
+    } else {
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        } else {
+            return NULL;
+        }
+
+        absfname = malloc(strlen(cwd) + strlen(fname) + 2);
+        sprintf(absfname, "%s/%s\0", cwd, fname);
+        return absfname;
+    }
+
+    return absfname;
+}
+
 int main (int argc, char **argv)
 {
-  if(argc < 3) {
-      printf("incorrect usage\n");
-      usage();
-      return 1;
-  }
-
-  int i;
-  pid_t pid, sid;
-  gint x_pos, y_pos;
-
-  GtkWidget *window;
-  GtkWidget *layout;
-  GtkWidget *image;
-  GdkPixbuf *pb;
-  GError *err = NULL;
-
-  int center_window = 0;
-
-  gtk_init(NULL,NULL);
-  pb = gdk_pixbuf_new_from_file (argv[argc-1],&err);
-  if (pb == NULL) {
-      g_fprintf(stderr, "%s\n", err->message);
-      g_error_free(err);
-      return 1;
-  }
-
-  gint image_width = gdk_pixbuf_get_width(pb);
-  gint image_height = gdk_pixbuf_get_height(pb);
-
-  for (i = 1; i < argc; i++)
-  {
-    if(strcmp(argv[i], "-p") == 0)
-    {
-      x_pos = atoi(argv[i+1]);
-      y_pos = atoi(argv[i+2]);    
+    if(argc < 3) {
+        printf("incorrect usage\n");
+        usage();
+        return 1;
     }
-    else if(strcmp(argv[i], "-tl") == 0)
-    {
-      x_pos = 0;
-      y_pos = 0;
+
+    char *path = get_absolute_path(argv[argc-1]);
+    if (!path) {
+        printf("failed to construct absolute path to file\n");
+        return 1;
     }
-    else if(strcmp(argv[i], "-tr") == 0)
-    {
-      x_pos = gdk_screen_width()-image_width;
-      y_pos = 0;
+
+    int i;
+    pid_t pid, sid;
+    gint x_pos, y_pos;
+
+    GtkWidget *window;
+    GtkWidget *layout;
+    GtkWidget *image;
+    GdkPixbuf *pb;
+    GError *err = NULL;
+
+    int center_window = 0;
+
+    gtk_init(NULL,NULL);
+    pb = gdk_pixbuf_new_from_file (path ,&err);
+    if (pb == NULL) {
+        g_fprintf(stderr, "%s\n", err->message);
+        g_error_free(err);
+        return 1;
     }
-    else if(strcmp(argv[i], "-c") == 0)
+
+    gint image_width = gdk_pixbuf_get_width(pb);
+    gint image_height = gdk_pixbuf_get_height(pb);
+
+    for (i = 1; i < argc; i++)
     {
-      center_window = 1;
+        if(strcmp(argv[i], "-p") == 0)
+        {
+            x_pos = atoi(argv[i+1]);
+            y_pos = atoi(argv[i+2]);
+        }
+        else if(strcmp(argv[i], "-tl") == 0)
+        {
+            x_pos = 0;
+            y_pos = 0;
+        }
+        else if(strcmp(argv[i], "-tr") == 0)
+        {
+            x_pos = gdk_screen_width()-image_width;
+            y_pos = 0;
+        }
+        else if(strcmp(argv[i], "-c") == 0)
+        {
+            center_window = 1;
+        }
+        else if(strcmp(argv[i], "-bl") == 0)
+        {
+            x_pos = 0;
+            y_pos = gdk_screen_height()-image_height;
+        }
+        else if(strcmp(argv[i], "-br") == 0)
+        {
+            x_pos = gdk_screen_width()-image_width;
+            y_pos = gdk_screen_height()-image_height;
+        }
+        else if(strcmp(argv[i], "--help") == 0)
+        {
+            usage();
+            return 0;
+        }
     }
-    else if(strcmp(argv[i], "-bl") == 0)
-    {
-      x_pos = 0;
-      y_pos = gdk_screen_height()-image_height;
-    }
-    else if(strcmp(argv[i], "-br") == 0)
-    {
-      x_pos = gdk_screen_width()-image_width;
-      y_pos = gdk_screen_height()-image_height;
-    }
-    else if(strcmp(argv[i], "--help") == 0)
-    {
-      usage();
-      return 0;
-    }
-  }
-  
-  pid = fork();
-  if (pid < 0)
-    exit(EXIT_FAILURE);
-  
-  if (pid > 0)
-    exit(EXIT_SUCCESS);
-  
-  umask(0);
 
-  sid = setsid();
-  if (sid < 0)
-    exit(EXIT_FAILURE);
+    pid = fork();
+    if (pid < 0)
+        exit(EXIT_FAILURE);
 
-  if ((chdir("/")) < 0)
-    exit(EXIT_FAILURE);
+    if (pid > 0)
+        exit(EXIT_SUCCESS);
 
-  close(STDIN_FILENO);
-  close(STDOUT_FILENO);
-  close(STDERR_FILENO);
+    umask(0);
 
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  layout = gtk_layout_new(NULL, NULL);
-  image = gtk_image_new_from_file(argv[argc-1]);
+    sid = setsid();
+    if (sid < 0)
+        exit(EXIT_FAILURE);
 
-  gtk_container_add(GTK_CONTAINER (window), layout);
-  gtk_widget_show(layout);
-  gtk_layout_put(GTK_LAYOUT(layout), image, 0, 0);
-  gtk_window_set_title (GTK_WINDOW (window), "Window");
-  gtk_window_set_default_size (GTK_WINDOW (window), image_width, image_height);
-  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-  gtk_widget_set_app_paintable(window, TRUE);
-  gtk_window_set_type_hint((GtkWindow*)window, (GdkWindowTypeHint) GDK_WINDOW_TYPE_HINT_DESKTOP);
-  gtk_window_set_decorated((GtkWindow*)window, 0);
-  gtk_window_set_keep_below((GtkWindow*)window, 1);
-  gtk_window_set_accept_focus((GtkWindow*)window, 0);
+    if ((chdir("/")) < 0)
+        exit(EXIT_FAILURE);
 
-  g_signal_connect((gpointer)window, "destroy", G_CALLBACK(destroy), NULL);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
-  if(!center_window)
-    gtk_window_move((GtkWindow*)window, x_pos, y_pos);
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    layout = gtk_layout_new(NULL, NULL);
+    image = gtk_image_new_from_file(path);
 
-  gtk_widget_show_all (window);
-  gtk_main();
+    gtk_container_add(GTK_CONTAINER (window), layout);
+    gtk_widget_show(layout);
+    gtk_layout_put(GTK_LAYOUT(layout), image, 0, 0);
+    gtk_window_set_title (GTK_WINDOW (window), "Window");
+    gtk_window_set_default_size (GTK_WINDOW (window), image_width, image_height);
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    gtk_widget_set_app_paintable(window, TRUE);
+    gtk_window_set_type_hint((GtkWindow*)window, (GdkWindowTypeHint) GDK_WINDOW_TYPE_HINT_DESKTOP);
+    gtk_window_set_decorated((GtkWindow*)window, 0);
+    gtk_window_set_keep_below((GtkWindow*)window, 1);
+    gtk_window_set_accept_focus((GtkWindow*)window, 0);
 
-  return 0;
+    g_signal_connect((gpointer)window, "destroy", G_CALLBACK(destroy), NULL);
+
+    if(!center_window)
+        gtk_window_move((GtkWindow*)window, x_pos, y_pos);
+
+    gtk_widget_show_all (window);
+    gtk_main();
+
+    return 0;
 }
 
