@@ -42,7 +42,6 @@ char * get_absolute_path(char *fname) {
 
         absfname = malloc(strlen(cwd) + strlen(fname) + 2);
         sprintf(absfname, "%s/%s\0", cwd, fname);
-        return absfname;
     }
 
     return absfname;
